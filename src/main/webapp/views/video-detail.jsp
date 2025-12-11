@@ -7,7 +7,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>${video.title}| MarcusVideo</title>
+<title>${video.title}</title>
 <link
 	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
 	rel="stylesheet">
@@ -22,11 +22,10 @@
 		<div class="row">
 			<div class="col-lg-8">
 				<div class="card shadow-sm border-0 mb-4">
-					<div class="ratio ratio-16x9">
-						<iframe
-							src="https://www.youtube.com/embed/${video.id}?autoplay=1&rel=0"
-							title="${video.title}" allowfullscreen></iframe>
+					<div class="ratio ratio-16x9 bg-black">
+						<div id="player"></div>
 					</div>
+
 					<div class="card-body">
 						<h3 class="card-title fw-bold text-dark">${video.title}</h3>
 
@@ -54,7 +53,8 @@
 
 						<hr>
 						<h5 class="fw-bold">Mô tả</h5>
-						<p class="text-secondary">${not empty video.description ? video.description : 'Chưa có mô tả cho video này.'}</p>
+						<p class="text-secondary">${not empty video.description ? video.description : 'Chưa có mô tả cho video này.'}
+						</p>
 					</div>
 				</div>
 
@@ -87,7 +87,6 @@
 			<div class="col-lg-4">
 				<h5 class="fw-bold mb-3">Video đề xuất</h5>
 				<div class="list-group shadow-sm">
-
 					<c:forEach var="item" items="${relatedVideos}">
 						<a href="<c:url value='/video?id=${item.id}'/>"
 							class="list-group-item list-group-item-action d-flex gap-3 py-3"
@@ -127,10 +126,9 @@
 				<div class="modal-body">
 					<div class="mb-3">
 						<label class="form-label">Link Video:</label> <input type="text"
-							class="form-control mb-2"
-							value="http://localhost:8080/MarcusVideo/video?id=${video.id}"
-							readonly> <label class="form-label">Nhập email
-							người nhận:</label> <input type="email" class="form-control"
+							class="form-control mb-2" id="shareLinkInput" readonly> <label
+							class="form-label">Nhập email người nhận:</label> <input
+							type="email" class="form-control"
 							placeholder="friend@example.com">
 					</div>
 				</div>
@@ -141,139 +139,186 @@
 		</div>
 	</div>
 
-	<script>
-    // --- 1. LOGIC LIKE VIDEO ---
-    function toggleLike(videoId) {
-        const btn = document.getElementById('btnLike');
-        const countSpan = document.getElementById('likeCount');
-        const icon = btn.querySelector('i');
-        const url = '<c:url value="/api/video/like" />';
-        
-        const params = new URLSearchParams();
-        params.append('id', videoId);
-
-        fetch(url, { method: 'POST', body: params })
-        .then(response => {
-            if (response.status === 401) {
-                alert('Vui lòng đăng nhập để thích video!');
-                window.location.href = '<c:url value="/login" />';
-                return;
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data && data.status === 'success') {
-                countSpan.innerText = data.totalLikes;
-                if (data.isLiked) {
-                    btn.classList.replace('btn-outline-danger', 'btn-danger');
-                    icon.classList.replace('bi-heart', 'bi-heart-fill');
-                } else {
-                    btn.classList.replace('btn-danger', 'btn-outline-danger');
-                    icon.classList.replace('bi-heart-fill', 'bi-heart');
-                }
-            }
-        })
-        .catch(err => console.error('Lỗi Like:', err));
-    }
-
-    // --- 2. LOGIC CHAT (WEBSOCKET) ---
-    let websocket;
-    const username = "${not empty sessionScope.user ? sessionScope.user.fullname : 'Khách'}";
-    const isLoggedIn = ${not empty sessionScope.user};
-
-    function connectWebSocket() {
-        const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
-        // Đảm bảo endpoint đúng với ServerEndpoint trong Java
-        const endpoint = protocol + window.location.host + "${pageContext.request.contextPath}/chat";
-        
-        console.log("Connecting to: " + endpoint);
-        websocket = new WebSocket(endpoint);
-
-        websocket.onopen = function(event) {
-            console.log("Chat Connected!");
-            updateChatStatus(true);
-        };
-
-        websocket.onmessage = function(event) {
-            try {
-            	// Xử lý JSON từ server trả về
-                const data = JSON.parse(event.data);
-                displayMessage(data.sender, data.content);
-            } catch (e) {
-                console.log("Received non-JSON message:", event.data);
-            }
-        };
-        
-        websocket.onclose = function(event) {
-            console.log("Chat Disconnected!");
-            updateChatStatus(false);
-        };
-    }
-
-    function updateChatStatus(connected) {
-        const badge = document.getElementById("statusBadge");
-        const input = document.getElementById("chatInput");
-        const btn = document.getElementById("btnSend");
-
-        if (connected) {
-            badge.className = "badge bg-success rounded-pill";
-            badge.innerText = "Live";
-            input.disabled = false;
-            btn.disabled = false;
-        } else {
-            badge.className = "badge bg-danger rounded-pill";
-            badge.innerText = "Offline";
-            input.disabled = true;
-            btn.disabled = true;
-        }
-    }
-
-    function sendMessage() {
-        const input = document.getElementById("chatInput");
-        const content = input.value.trim();
-        
-        if (content !== "" && websocket && websocket.readyState === WebSocket.OPEN) {
-        	// Gửi JSON object lên server (khớp với DTO bên Java)
-            const message = { sender: username, content: content };
-            websocket.send(JSON.stringify(message));
-            input.value = "";
-            input.focus();
-        }
-    }
-
-    function displayMessage(sender, content) {
-        const chatBox = document.getElementById("chatBox");
-        const isMe = sender === username;
-        
-        const div = document.createElement("div");
-        div.className = isMe ? "d-flex justify-content-end mb-2" : "d-flex justify-content-start mb-2";
-        
-        const bubbleColor = isMe ? "bg-primary text-white" : "bg-white text-dark border";
-        
-        div.innerHTML = `
-            <div class="p-2 rounded shadow-sm \${bubbleColor}" style="max-width: 75%;">
-                <div class="small fw-bold opacity-75" style="font-size: 0.75rem;">\${sender}</div>
-                <div>\${content}</div>
-            </div>
-        `;
-        
-        chatBox.appendChild(div);
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    document.addEventListener("DOMContentLoaded", function() {
-        if (isLoggedIn) {
-            connectWebSocket();
-            document.getElementById("chatInput").addEventListener("keypress", function(e) {
-                if (e.key === "Enter") sendMessage();
-            });
-        } else {
-            document.getElementById("chatInput").placeholder = "Vui lòng đăng nhập để chat!";
-        }
-    });
-	</script>
-
 	<script
 		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+	<script>
+        // --- 0. INIT SHARE LINK ---
+        // Tự động điền link hiện tại vào modal share khi mở trang
+        document.addEventListener("DOMContentLoaded", function() {
+            const shareInput = document.getElementById('shareLinkInput');
+            if(shareInput) shareInput.value = window.location.href;
+        });
+
+        // --- 1. LOGIC LIKE VIDEO ---
+        function toggleLike(videoId) {
+            const btn = document.getElementById('btnLike');
+            const countSpan = document.getElementById('likeCount');
+            const icon = btn.querySelector('i');
+            const url = '<c:url value="/api/video/like" />';
+            
+            const params = new URLSearchParams();
+            params.append('id', videoId);
+
+            fetch(url, { method: 'POST', body: params })
+            .then(response => {
+                if (response.status === 401) {
+                    alert('Vui lòng đăng nhập để thích video!');
+                    window.location.href = '<c:url value="/login" />';
+                    return;
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data && data.status === 'success') {
+                    countSpan.innerText = data.totalLikes;
+                    if (data.isLiked) {
+                        btn.classList.replace('btn-outline-danger', 'btn-danger');
+                        icon.classList.replace('bi-heart', 'bi-heart-fill');
+                    } else {
+                        btn.classList.replace('btn-danger', 'btn-outline-danger');
+                        icon.classList.replace('bi-heart-fill', 'bi-heart');
+                    }
+                }
+            })
+            .catch(err => console.error('Lỗi Like:', err));
+        }
+
+        // --- 2. LOGIC CHAT (WEBSOCKET) ---
+        let websocket;
+        const username = "${not empty sessionScope.user ? sessionScope.user.fullname : 'Khách'}";
+        const isLoggedIn = ${not empty sessionScope.user};
+
+        function connectWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+            const endpoint = protocol + window.location.host + "${pageContext.request.contextPath}/chat";
+            
+            console.log("Connecting to: " + endpoint);
+            websocket = new WebSocket(endpoint);
+
+            websocket.onopen = function(event) {
+                console.log("Chat Connected!");
+                updateChatStatus(true);
+            };
+
+            websocket.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    displayMessage(data.sender, data.content);
+                } catch (e) {
+                    console.log("Non-JSON message:", event.data);
+                }
+            };
+            
+            websocket.onclose = function(event) {
+                console.log("Chat Disconnected!");
+                updateChatStatus(false);
+            };
+        }
+
+        function updateChatStatus(connected) {
+            const badge = document.getElementById("statusBadge");
+            const input = document.getElementById("chatInput");
+            const btn = document.getElementById("btnSend");
+
+            if (connected) {
+                badge.className = "badge bg-success rounded-pill";
+                badge.innerText = "Live";
+                input.disabled = false;
+                btn.disabled = false;
+            } else {
+                badge.className = "badge bg-danger rounded-pill";
+                badge.innerText = "Offline";
+                input.disabled = true;
+                btn.disabled = true;
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById("chatInput");
+            const content = input.value.trim();
+            
+            if (content !== "" && websocket && websocket.readyState === WebSocket.OPEN) {
+                const message = { sender: username, content: content };
+                websocket.send(JSON.stringify(message));
+                input.value = "";
+                input.focus();
+            }
+        }
+
+        function displayMessage(sender, content) {
+            const chatBox = document.getElementById("chatBox");
+            const isMe = sender === username;
+            
+            const div = document.createElement("div");
+            div.className = isMe ? "d-flex justify-content-end mb-2" : "d-flex justify-content-start mb-2";
+            const bubbleColor = isMe ? "bg-primary text-white" : "bg-white text-dark border";
+            
+            div.innerHTML = `
+                <div class="p-2 rounded shadow-sm \${bubbleColor}" style="max-width: 75%;">
+                    <div class="small fw-bold opacity-75" style="font-size: 0.75rem;">\${sender}</div>
+                    <div>\${content}</div>
+                </div>
+            `;
+            
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Init Chat
+        document.addEventListener("DOMContentLoaded", function() {
+            if (isLoggedIn) {
+                connectWebSocket();
+                document.getElementById("chatInput").addEventListener("keypress", function(e) {
+                    if (e.key === "Enter") sendMessage();
+                });
+            } else {
+                document.getElementById("chatInput").placeholder = "Vui lòng đăng nhập để chat!";
+            }
+        });
+
+        // --- 3. YOUTUBE IFRAME API (Logic MỚI) ---
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        var player;
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '100%',
+                width: '100%',
+                // LƯU Ý: Đảm bảo video.id ở đây là ID chuỗi của Youtube (vd: dQw4w9WgXcQ)
+                // Nếu video.id trong DB là số, code này sẽ lỗi.
+                videoId: '${video.id}', 
+                playerVars: {
+                    'playsinline': 1,
+                    'autoplay': 1,
+                    'rel': 0
+                },
+                events: {
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+
+        function onPlayerStateChange(event) {
+            // 0 là trạng thái ENDED
+            if (event.data === 0) {
+                playNextVideo();
+            }
+        }
+
+        function playNextVideo() {
+            // Tìm video kế tiếp trong list group
+            const nextVideoLink = document.querySelector('.list-group-item');
+            if (nextVideoLink) {
+                console.log("Auto playing next video...");
+                window.location.href = nextVideoLink.href;
+            } else {
+                console.log("No related video found.");
+            }
+        }
+    </script>
 </body>
 </html>
