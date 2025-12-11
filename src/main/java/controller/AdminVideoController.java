@@ -12,11 +12,14 @@ import entity.VideoEntity;
 import service.VideoService;
 import service.VideoServiceImpl;
 import utils.VideoUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @WebServlet({ "/admin/video", "/admin/video/create", "/admin/video/update", "/admin/video/delete",
 		"/admin/video/edit/*", "/admin/video/reset" })
 public class AdminVideoController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	private static final Logger logger = LogManager.getLogger(AdminVideoController.class);
 	private VideoService videoService = new VideoServiceImpl();
 
 	@Override
@@ -27,16 +30,15 @@ public class AdminVideoController extends HttpServlet {
 		formVideo.setViews(0);
 		formVideo.setActive(true);
 
-		// 1. Logic Edit
 		if (path.contains("edit")) {
 			String id = req.getPathInfo().substring(1);
 			formVideo = videoService.findById(id);
 		}
-		// 2. Logic Reset (trả về form rỗng)
+		// Reset
 		else if (path.contains("reset")) {
 		}
 
-		// 3. Logic Phân trang
+		// Phân trang
 		int page = 1;
 		int pageSize = 7;
 		if (req.getParameter("page") != null) {
@@ -46,15 +48,12 @@ public class AdminVideoController extends HttpServlet {
 				page = 1;
 			}
 		}
-
 		List<VideoEntity> list = videoService.findAll(page, pageSize);
 		int totalPage = videoService.getTotalPage(pageSize);
-
 		req.setAttribute("video", formVideo);
 		req.setAttribute("videos", list);
 		req.setAttribute("currentPage", page);
 		req.setAttribute("totalPage", totalPage);
-
 		req.getRequestDispatcher("/views/admin/video.jsp").forward(req, resp);
 	}
 
@@ -62,8 +61,6 @@ public class AdminVideoController extends HttpServlet {
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		req.setCharacterEncoding("UTF-8");
 		String path = req.getServletPath();
-
-		// --- XỬ LÝ XÓA ---
 		if (path.contains("delete")) {
 			String id = req.getParameter("id");
 			try {
@@ -76,15 +73,14 @@ public class AdminVideoController extends HttpServlet {
 			return;
 		}
 
-		// --- XỬ LÝ THÊM / SỬA ---
 		VideoEntity video = new VideoEntity();
 		try {
 			BeanUtils.populate(video, req.getParameterMap());
 
-			// 1. Xử lý Active (Checkbox)
+			// 1. Xử lý Active
 			video.setActive(req.getParameter("active") != null);
 
-			// 2. Xử lý Views (Tránh lỗi NullPointerException)
+			// 2. Xử lý Views tránh lỗi NullPointerException
 			if (video.getViews() == null) {
 				video.setViews(0);
 			}
@@ -98,7 +94,7 @@ public class AdminVideoController extends HttpServlet {
 				VideoEntity existingVideo = videoService.findById(realId);
 				if (existingVideo != null) {
 					req.setAttribute("error", "Video ID " + realId + " đã tồn tại!");
-					req.setAttribute("video", video); // Giữ lại dữ liệu form
+					req.setAttribute("video", video);
 					doGet(req, resp);
 					return;
 				}
@@ -108,12 +104,12 @@ public class AdminVideoController extends HttpServlet {
 				videoService.update(video);
 				req.getSession().setAttribute("message", "Cập nhật thành công!");
 			}
-
-			// Redirect về trang chủ quản lý video để làm mới form
 			resp.sendRedirect(req.getContextPath() + "/admin/video");
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			// e.printStackTrace();
+			// ghi log lỗi
+			logger.error("Error in AdminVideoController path: " + path, e);
 			req.setAttribute("error", "Lỗi hệ thống: " + e.getMessage());
 			doGet(req, resp);
 		}

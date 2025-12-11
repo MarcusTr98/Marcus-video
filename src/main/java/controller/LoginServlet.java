@@ -11,12 +11,15 @@ import service.UserServiceImpl;
 import utils.CookieUtils;
 
 import java.io.IOException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import entity.UserEntity;
 
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	private static final Logger logger = LogManager.getLogger(LoginServlet.class);
 	private UserService userService = new UserServiceImpl();
 
 	public LoginServlet() {
@@ -37,6 +40,8 @@ public class LoginServlet extends HttpServlet {
 		UserEntity user = userService.login(idOrEmail, password);
 
 		if (user != null) {
+			//ghi log info ng đăng nhập thành công
+			logger.info("User login success: " + user.getId() + " (" + user.getEmail() + ")");
 			HttpSession session = request.getSession();
 			session.setAttribute("user", user);
 			if (remember != null) {
@@ -57,6 +62,8 @@ public class LoginServlet extends HttpServlet {
 				}
 			}
 		} else {
+			//ghi log warn đăng nhập sai
+			logger.warn("Login failed for: " + idOrEmail);
 			request.setAttribute("message", "Sai thông tin đăng nhập!");
 			request.getRequestDispatcher("/views/login.jsp").forward(request, response);
 		}

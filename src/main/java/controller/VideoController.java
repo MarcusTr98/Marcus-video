@@ -5,9 +5,15 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
 import java.io.IOException;
 import java.util.List;
+
+import entity.UserEntity;
 import entity.VideoEntity;
+import service.HistoryService;
+import service.HistoryServiceImpl;
 import service.VideoService;
 import service.VideoServiceImpl;
 
@@ -15,6 +21,7 @@ import service.VideoServiceImpl;
 public class VideoController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private VideoService videoService = new VideoServiceImpl();
+	private HistoryService historyService = new HistoryServiceImpl();
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -23,7 +30,7 @@ public class VideoController extends HttpServlet {
 		if (path.contains("search")) {
 			String keyword = req.getParameter("keyword");
 			int page = 1;
-			int pageSize = 6; // Số lượng video mỗi trang
+			int pageSize = 6;
 			// Xử lý tham số Page an toàn
 			if (req.getParameter("page") != null) {
 				try {
@@ -32,6 +39,7 @@ public class VideoController extends HttpServlet {
 					page = 1;
 				}
 			}
+
 			List<VideoEntity> videos;
 			int totalPage;
 			// Logic: Có từ khóa -> Tìm kiếm. Không có -> Lấy tất cả.
@@ -56,6 +64,14 @@ public class VideoController extends HttpServlet {
 			if (videoId != null) {
 				videoService.increaseView(videoId);
 				VideoEntity video = videoService.findById(videoId);
+
+				HttpSession session = req.getSession();
+				UserEntity currentUser = (UserEntity) session.getAttribute("user");
+				if (currentUser != null && video != null) {
+					// lưu lịch sử nếu user đã đăng nhập
+					historyService.create(currentUser, video);
+				}
+				
 				if (video != null) {
 					List<VideoEntity> relatedVideos = videoService.findAll(1, 3);
 					req.setAttribute("video", video);
