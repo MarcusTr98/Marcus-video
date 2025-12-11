@@ -28,4 +28,6 @@ public interface VideoService {
 	List<VideoEntity> findByKeyword(String keyword, int page, int pageSize);
 
 	int getTotalPageByKeyword(String keyword, int pageSize);
+
+	List<VideoEntity> findRandom(String excludeId, int limit);
 }

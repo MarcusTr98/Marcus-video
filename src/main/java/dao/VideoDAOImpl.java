@@ -4,6 +4,7 @@ import java.util.List;
 
 import entity.VideoEntity;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import utils.XJPA;
 
@@ -137,4 +138,19 @@ public class VideoDAOImpl extends AbstractDAO<VideoEntity, String> implements Vi
 		}
 	}
 
+	@Override
+	public List<VideoEntity> findRandom(String excludeId, int limit) {
+		EntityManager em = XJPA.getEntityManager();
+		try {
+			// SQL SERVER: Dùng NEWID() để random
+			String sql = "SELECT TOP " + limit + " * FROM Videos WHERE id != :id AND active = 1 ORDER BY NEWID()";
+			// createQuery -> Dùng cho JPQL
+			// createNativeQuery -> Dùng cho SQL thuần (Map kết quả về VideoEntity.class)
+			Query query = em.createNativeQuery(sql, VideoEntity.class);
+			query.setParameter("id", excludeId);
+			return query.getResultList();
+		} finally {
+			em.close();
+		}
+	}
 }

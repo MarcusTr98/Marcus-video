@@ -17,5 +17,7 @@ public interface VideoDAO extends DAO<VideoEntity, String> {
 
 	List<VideoEntity> findByKeyword(String keyword, int page, int pageSize);
 
-	long countByKeyword(String keyword); // Đếm số kết quả tìm được để chia trang
+	long countByKeyword(String keyword);
+	
+	List<VideoEntity> findRandom(String excludeId, int limit);
 }

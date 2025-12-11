@@ -55,9 +55,9 @@
 								<li><a class="dropdown-item text-success"
 									href="<c:url value='/account/favorites'/>"><i
 										class="bi bi-box2-heart me-2"></i>My Favorites</a></li>
-								<li><a class="dropdown-item"
+								<li><a class="dropdown-item text-success"
 									href="<c:url value='/account/history'/>"><i
-										class="bi bi-clock-history me-2"></i>My Histories</a></li>
+										class="bi bi-clock-history me-2"></i>Watch History</a></li>
 
 								<%-- ADMIN MENU --%>
 								<c:if test="${sessionScope.user.admin}">

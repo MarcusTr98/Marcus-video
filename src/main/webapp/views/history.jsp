@@ -7,7 +7,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Lịch sử xem</title>
+<title>Watch History</title>
 <link
 	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
 	rel="stylesheet">
@@ -20,7 +20,7 @@
 
 	<div class="container py-5">
 		<h3 class="fw-bold text-dark mb-4">
-			<i class="bi bi-clock-history me-2"></i>Lịch sử xem
+			<i class="bi bi-clock-history me-2"></i>Watch History
 		</h3>
 
 		<c:if test="${empty histories}">

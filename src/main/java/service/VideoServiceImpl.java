@@ -90,7 +90,6 @@ public class VideoServiceImpl implements VideoService {
 	@Override
 	public void deleteById(String id) {
 		videoDAO.deleteById(id);
-
 	}
 
 	@Override
@@ -102,6 +101,11 @@ public class VideoServiceImpl implements VideoService {
 	public int getTotalPageByKeyword(String keyword, int pageSize) {
 		long count = videoDAO.countByKeyword(keyword);
 		return (int) Math.ceil((double) count / pageSize);
+	}
+
+	@Override
+	public List<VideoEntity> findRandom(String excludeId, int limit) {
+	    return videoDAO.findRandom(excludeId, limit);
 	}
 
 }

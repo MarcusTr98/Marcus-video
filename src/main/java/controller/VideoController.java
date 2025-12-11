@@ -71,11 +71,11 @@ public class VideoController extends HttpServlet {
 					// lưu lịch sử nếu user đã đăng nhập
 					historyService.create(currentUser, video);
 				}
-				
+
 				if (video != null) {
-					List<VideoEntity> relatedVideos = videoService.findAll(1, 3);
-					req.setAttribute("video", video);
+					List<VideoEntity> relatedVideos = videoService.findRandom(videoId, 3);
 					req.setAttribute("relatedVideos", relatedVideos);
+					req.setAttribute("video", video);
 					req.getRequestDispatcher("/views/video-detail.jsp").forward(req, resp);
 					return;
 				}
