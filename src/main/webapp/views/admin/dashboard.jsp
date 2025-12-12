@@ -2,6 +2,7 @@
 	pageEncoding="UTF-8"%>
 <%@ taglib uri="jakarta.tags.core" prefix="c"%>
 <%@ taglib uri="jakarta.tags.fmt" prefix="fmt"%>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
 <!DOCTYPE html>
 <html lang="vi">
@@ -181,8 +182,9 @@
 	<script>
         const labels = [];
         const dataLikes = [];
+        
         <c:forEach var="item" items="${videoStats}" begin="0" end="4">
-            labels.push('${item.videoTitle}');
+        labels.push('${fn:escapeXml(item.videoTitle)}');
             dataLikes.push(${item.totalLikes});
         </c:forEach>
 

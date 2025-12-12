@@ -10,7 +10,7 @@ public interface UserService {
 
 	UserEntity findByEmail(String email);
 
-	UserEntity findById(String id);
+	UserEntity findById(String targetUserId);
 
 	// CRUD
 	List<UserEntity> findAll(int page, int pageSize);
@@ -24,4 +24,6 @@ public interface UserService {
 	void deleteById(String id);
 
 	void changePassword(String userId, String newPassword);
+
+	UserEntity findByIdOrEmail(String idOrEmail);
 }

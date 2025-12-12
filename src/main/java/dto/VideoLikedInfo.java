@@ -16,4 +16,8 @@ public class VideoLikedInfo {
 	private Long totalLikes;
 	private Date newestDate, oldestDate;
 
+	public VideoLikedInfo(String videoTitle, Long totalLikes) {
+		this.videoTitle = videoTitle;
+		this.totalLikes = totalLikes;
+	}
 }

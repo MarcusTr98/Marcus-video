@@ -105,7 +105,7 @@ public class VideoServiceImpl implements VideoService {
 
 	@Override
 	public List<VideoEntity> findRandom(String excludeId, int limit) {
-	    return videoDAO.findRandom(excludeId, limit);
+		return videoDAO.findRandom(excludeId, limit);
 	}
 
 }

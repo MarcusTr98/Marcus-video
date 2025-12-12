@@ -2,6 +2,7 @@ package dao;
 
 import java.util.List;
 
+import dto.VideoLikedInfo;
 import entity.VideoEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;

@@ -47,7 +47,7 @@ public class AuthFilter extends HttpFilter implements Filter {
 			String usernameInCookie = CookieUtils.get("username", req);
 			if (usernameInCookie != null && !usernameInCookie.isEmpty()) {
 				// Tìm user trong DB dựa vào cookie
-				UserEntity userFromCookie = userService.findById(usernameInCookie);
+				UserEntity userFromCookie = userService.findByIdOrEmail(usernameInCookie);
 				if (userFromCookie != null) {
 					user = userFromCookie;
 					session.setAttribute("user", user);

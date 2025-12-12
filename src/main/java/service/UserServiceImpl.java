@@ -99,4 +99,9 @@ public class UserServiceImpl implements UserService {
 			System.out.println("Đã đổi mật khẩu DB thành công cho user: " + userId);
 		}
 	}
+
+	@Override
+	public UserEntity findByIdOrEmail(String idOrEmail) {
+		return userDAO.findByIdOrEmail(idOrEmail);
+	}
 }
