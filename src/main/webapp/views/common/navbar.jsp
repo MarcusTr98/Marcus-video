@@ -32,17 +32,19 @@
 
 			<div class="d-flex align-items-center gap-2">
 				<c:choose>
-					<%-- LOGGED IN --%>
+					<%-- 1. ĐÃ ĐĂNG NHẬP --%>
 					<c:when test="${not empty sessionScope.user}">
 						<div class="dropdown">
 							<button
 								class="btn btn-outline-light border-0 dropdown-toggle d-flex align-items-center gap-2"
 								type="button" data-bs-toggle="dropdown">
+
+								<%-- SỬA LỖI AVATAR Ở ĐÂY --%>
 								<img
-									src="${not empty sessionScope.user.avatar ? sessionScope.user.avatar : 'https://ui-avatars.com/api/?name=' += sessionScope.user.fullname}"
-									class="rounded-circle" width="30" height="30" alt="Avatar">
-								<span class="small fw-bold">Hi,
-									${sessionScope.user.fullname}</span>
+									src="${not empty sessionScope.user.avatar ? sessionScope.user.avatar : 'https://ui-avatars.com/api/?background=random&name='.concat(sessionScope.user.fullname)}"
+									class="rounded-circle" width="30" height="30"
+									style="object-fit: cover;" alt="Avatar"> <span
+									class="small fw-bold">Hi, ${sessionScope.user.fullname}</span>
 							</button>
 
 							<ul
@@ -50,14 +52,17 @@
 								<li><h6 class="dropdown-header text-success">My
 										Account</h6></li>
 								<li><a class="dropdown-item text-success"
-									href="<c:url value='/account/profile'/>"><i
-										class="bi bi-person-gear me-2"></i>My Profile</a></li>
+									href="<c:url value='/account/profile'/>"> <i
+										class="bi bi-person-gear me-2"></i>My Profile
+								</a></li>
 								<li><a class="dropdown-item text-success"
-									href="<c:url value='/account/favorites'/>"><i
-										class="bi bi-box2-heart me-2"></i>My Favorites</a></li>
+									href="<c:url value='/account/favorites'/>"> <i
+										class="bi bi-box2-heart me-2"></i>My Favorites
+								</a></li>
 								<li><a class="dropdown-item text-success"
-									href="<c:url value='/account/history'/>"><i
-										class="bi bi-clock-history me-2"></i>Watch History</a></li>
+									href="<c:url value='/account/history'/>"> <i
+										class="bi bi-clock-history me-2"></i>Watch History
+								</a></li>
 
 								<%-- ADMIN MENU --%>
 								<c:if test="${sessionScope.user.admin}">
@@ -80,20 +85,23 @@
 
 								<li><hr class="dropdown-divider"></li>
 								<li><a class="dropdown-item text-danger"
-									href="<c:url value='/logout'/>"><i
-										class="bi bi-box-arrow-right me-2"></i>Log Out</a></li>
+									href="<c:url value='/logout'/>"> <i
+										class="bi bi-box-arrow-right me-2"></i>Log Out
+								</a></li>
 							</ul>
 						</div>
 					</c:when>
 
-					<%-- GUEST --%>
+					<%-- 2. KHÁCH (CHƯA LOGIN) --%>
 					<c:otherwise>
 						<a href="<c:url value='/login'/>"
-							class="btn btn-outline-light btn-sm fw-bold px-3"><i
-							class="bi bi-box-arrow-in-right me-2"></i> Login</a>
+							class="btn btn-outline-light btn-sm fw-bold px-3"> <i
+							class="bi bi-box-arrow-in-right me-2"></i> Login
+						</a>
 						<a href="<c:url value='/register'/>"
-							class="btn btn-danger btn-sm fw-bold px-3"><i
-							class="bi bi-pencil-square me-2"></i>Register</a>
+							class="btn btn-danger btn-sm fw-bold px-3"> <i
+							class="bi bi-pencil-square me-2"></i>Register
+						</a>
 					</c:otherwise>
 				</c:choose>
 			</div>

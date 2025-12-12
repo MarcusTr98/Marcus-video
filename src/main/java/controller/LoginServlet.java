@@ -36,20 +36,30 @@ public class LoginServlet extends HttpServlet {
 		String idOrEmail = request.getParameter("idOrEmail");
 		String password = request.getParameter("password");
 		String remember = request.getParameter("remember");
-
 		UserEntity user = userService.login(idOrEmail, password);
 
 		if (user != null) {
-			//ghi log info ng đăng nhập thành công
-			logger.info("User login success: " + user.getId() + " (" + user.getEmail() + ")");
+			// --- ĐĂNG NHẬP THÀNH CÔNG ---
+			// 1. Kiểm tra Active
+			if (!user.getIsActive()) {
+				request.setAttribute("message", "Tài khoản của bạn đã bị khóa do vi phạm chính sách!");
+				request.getRequestDispatcher("/views/login.jsp").forward(request, response);
+				return;
+			}
+
+			// 2. Ghi log và Session
+			logger.info("Login success: " + user.getId());
 			HttpSession session = request.getSession();
 			session.setAttribute("user", user);
+
+			// 3. Xử lý Cookie
 			if (remember != null) {
 				CookieUtils.add("username", idOrEmail, 24, response);
 			} else {
 				CookieUtils.add("username", "", 0, response);
 			}
 
+			// 4. Redirect
 			String securityUri = (String) session.getAttribute("securityUri");
 			if (securityUri != null) {
 				session.removeAttribute("securityUri");
@@ -62,9 +72,11 @@ public class LoginServlet extends HttpServlet {
 				}
 			}
 		} else {
-			//ghi log warn đăng nhập sai
+			// --- ĐĂNG NHẬP THẤT BẠI ---
+			// (Service trả về null nghĩa là sai Email hoặc sai Password)
 			logger.warn("Login failed for: " + idOrEmail);
 			request.setAttribute("message", "Sai thông tin đăng nhập!");
+			request.setAttribute("idOrEmail", idOrEmail); // Giữ lại email để user đỡ nhập lại
 			request.getRequestDispatcher("/views/login.jsp").forward(request, response);
 		}
 	}

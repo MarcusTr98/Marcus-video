@@ -125,15 +125,28 @@
 				</div>
 				<div class="modal-body">
 					<div class="mb-3">
-						<label class="form-label">Link Video:</label> <input type="text"
-							class="form-control mb-2" id="shareLinkInput" readonly> <label
-							class="form-label">Nhập email người nhận:</label> <input
-							type="email" class="form-control"
+						<label class="form-label">Link Video:</label>
+						<div class="input-group mb-2">
+							<input type="text" class="form-control" id="shareLinkInput"
+								readonly>
+							<button class="btn btn-outline-secondary"
+								onclick="copyToClipboard()">Copy</button>
+						</div>
+
+						<label class="form-label">Nhập email người nhận:</label> <input
+							type="email" class="form-control" id="shareEmailInput"
 							placeholder="friend@example.com">
+						<div id="shareError" class="text-danger small mt-1"
+							style="display: none;"></div>
 					</div>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-primary">Gửi ngay</button>
+					<button type="button" class="btn btn-secondary"
+						data-bs-dismiss="modal">Đóng</button>
+					<button type="button" class="btn btn-primary" id="btnConfirmShare"
+						onclick="sendShareVideo()">
+						<i class="bi bi-send"></i> Gửi ngay
+					</button>
 				</div>
 			</div>
 		</div>
@@ -318,6 +331,77 @@
             } else {
                 console.log("No related video found.");
             }
+        }
+        
+     // --- 4. LOGIC SHARE VIDEO ---
+        function sendShareVideo() {
+            const emailInput = document.getElementById('shareEmailInput');
+            const linkInput = document.getElementById('shareLinkInput');
+            const btnSend = document.getElementById('btnConfirmShare');
+            const errorDiv = document.getElementById('shareError');
+            
+            const email = emailInput.value.trim();
+            const videoId = '${video.id}'; // Lấy ID video từ server side
+            
+            // Reset lỗi
+            errorDiv.style.display = 'none';
+            errorDiv.innerText = '';
+
+            // Validate cơ bản
+            if (!email) {
+                errorDiv.innerText = 'Vui lòng nhập email người nhận!';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            // Validate định dạng email (Regex đơn giản)
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                errorDiv.innerText = 'Email không hợp lệ!';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            // Hiệu ứng Loading
+            const originalText = btnSend.innerHTML;
+            btnSend.disabled = true;
+            btnSend.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Đang gửi...';
+
+            // Gọi API (AJAX)
+            const url = '<c:url value="/api/video/share" />';
+            const params = new URLSearchParams();
+            params.append('videoId', videoId);
+            params.append('email', email);
+
+            fetch(url, { method: 'POST', body: params })
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Đã gửi chia sẻ thành công!');
+                    // Đóng modal
+                    const modalEl = document.getElementById('shareModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    modal.hide();
+                    // Xóa trắng ô email
+                    emailInput.value = '';
+                } else {
+                    errorDiv.innerText = data.message || 'Có lỗi xảy ra, vui lòng thử lại!';
+                    errorDiv.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                errorDiv.innerText = 'Lỗi kết nối Server!';
+                errorDiv.style.display = 'block';
+            })
+            .finally(() => {
+                // Trả lại trạng thái nút
+                btnSend.disabled = false;
+                btnSend.innerHTML = originalText;
+            });
         }
     </script>
 </body>

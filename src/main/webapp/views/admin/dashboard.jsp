@@ -143,7 +143,7 @@
 						<thead class="table-light">
 							<tr>
 								<th>Video Title</th>
-								<th class="text-center">Số Lượt Thích</th>
+								<th>Số Lượt Thích</th>
 								<th>Ngày Thích Mới Nhất</th>
 								<th>Ngày Thích Cũ Nhất</th>
 							</tr>
@@ -152,8 +152,7 @@
 							<c:forEach var="item" items="${videoStats}">
 								<tr>
 									<td class="fw-bold text-primary">${item.videoTitle}</td>
-									<td class="text-center"><span
-										class="badge bg-danger rounded-pill">${item.totalLikes}
+									<td><span class="badge bg-danger rounded-pill">${item.totalLikes}
 											<i class="bi bi-heart-fill small"></i>
 									</span></td>
 									<td><fmt:formatDate value="${item.newestDate}"

@@ -6,7 +6,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Quản Lý Người Dùng</title>
+<title>Quản Lý Người Dùng | Admin</title>
 <link
 	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
 	rel="stylesheet">
@@ -20,17 +20,27 @@
 	<div class="container-fluid py-4">
 		<div class="row g-4">
 
-			<div class="col-lg-5">
+			<div class="col-lg-4">
 				<div class="card shadow-sm border-0 sticky-top"
 					style="top: 80px; z-index: 1;">
 					<div class="card-header bg-white fw-bold text-primary">
 						<i class="bi bi-person-gear me-2"></i>Thông Tin Người Dùng
 					</div>
 					<div class="card-body">
-						<c:if test="${not empty message}">
-							<div class="alert alert-info alert-dismissible fade show"
+						<c:if test="${not empty sessionScope.message}">
+							<div class="alert alert-success alert-dismissible fade show"
 								role="alert">
-								<small>${message}</small>
+								<small>${sessionScope.message}</small>
+								<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+								<%
+								session.removeAttribute("message");
+								%>
+							</div>
+						</c:if>
+						<c:if test="${not empty error}">
+							<div class="alert alert-danger alert-dismissible fade show"
+								role="alert">
+								<small>${error}</small>
 								<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 							</div>
 						</c:if>
@@ -41,13 +51,15 @@
 							<div class="mb-3">
 								<label class="form-label small fw-bold">Tên đăng nhập
 									(ID)</label> <input class="form-control" name="id" value="${user.id}"
-									placeholder="Nhập ID..." required>
+									placeholder="Nhập ID..." required 
+									${not empty
+									user.id && user.id !=''? 'readonly' : ''}>
 							</div>
 
 							<div class="mb-3">
 								<label class="form-label small fw-bold">Mật khẩu</label> <input
 									type="password" class="form-control" name="password"
-									value="${user.password}" required>
+									placeholder="${not empty user.id ? 'Bỏ trống nếu không đổi pass' : 'Nhập mật khẩu...'}">
 							</div>
 
 							<div class="mb-3">
@@ -62,17 +74,31 @@
 									value="${user.email}" placeholder="email@example.com" required>
 							</div>
 
-							<div class="mb-4">
+							<div class="mb-3">
 								<label class="form-label small fw-bold d-block">Vai trò</label>
 								<div class="btn-group w-100" role="group">
 									<input type="radio" class="btn-check" name="admin"
-										id="roleUser" value="false" ${!user.admin ? 'checked' : ''}
-										checked> <label class="btn btn-outline-secondary"
-										for="roleUser">Người dùng</label> <input type="radio"
-										class="btn-check" name="admin" id="roleAdmin" value="true"
-										${user.admin ? 'checked' : ''}> <label
-										class="btn btn-outline-danger" for="roleAdmin">Quản
+										id="roleUser" value="false" ${!user.admin ? 'checked' : ''}>
+									<label class="btn btn-outline-primary w-50" for="roleUser">Người
+										dùng</label> <input type="radio" class="btn-check" name="admin"
+										id="roleAdmin" value="true" ${user.admin ? 'checked' : ''}>
+									<label class="btn btn-outline-danger w-50" for="roleAdmin">Quản
 										trị viên</label>
+								</div>
+							</div>
+
+							<div class="mb-4">
+								<label class="form-label small fw-bold d-block">Trạng
+									thái</label>
+								<div class="btn-group w-100" role="group">
+									<input type="radio" class="btn-check" name="isActive"
+										id="statusActive" value="true"
+										${user.isActive ? 'checked' : ''}> <label
+										class="btn btn-outline-success w-50" for="statusActive">Hoạt
+										động</label> <input type="radio" class="btn-check" name="isActive"
+										id="statusBanned" value="false"
+										${!user.isActive ? 'checked' : ''}> <label
+										class="btn btn-outline-secondary w-50" for="statusBanned">Khóa</label>
 								</div>
 							</div>
 
@@ -80,19 +106,23 @@
 								<div class="row g-2">
 									<div class="col-6">
 										<button class="btn btn-success w-100"
-											formaction="${base}/create">
+											formaction="${base}/create"
+											${not empty user.id ? 'disabled' : ''}>
 											<i class="bi bi-plus-circle"></i> Thêm
 										</button>
 									</div>
 									<div class="col-6">
 										<button class="btn btn-warning w-100"
-											formaction="${base}/update">
+											formaction="${base}/update"
+											${empty user.id ? 'disabled' : ''}>
 											<i class="bi bi-pencil-square"></i> Sửa
 										</button>
 									</div>
 									<div class="col-6">
 										<button class="btn btn-danger w-100"
-											formaction="${base}/delete">
+											formaction="${base}/delete"
+											${empty user.id ? 'disabled' : ''}
+											onclick="return confirm('Bạn có chắc muốn xóa user này?');">
 											<i class="bi bi-trash"></i> Xóa
 										</button>
 									</div>
@@ -109,7 +139,7 @@
 				</div>
 			</div>
 
-			<div class="col-lg-7">
+			<div class="col-lg-8">
 				<div class="card shadow-sm border-0">
 					<div
 						class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
@@ -126,6 +156,7 @@
 										<th>Họ và tên</th>
 										<th>Email</th>
 										<th class="text-center">Vai trò</th>
+										<th class="text-center">Trạng thái</th>
 										<th class="text-end">Hành động</th>
 									</tr>
 								</thead>
@@ -135,6 +166,7 @@
 											<td class="fw-bold text-primary">${u.id}</td>
 											<td>${u.fullname}</td>
 											<td>${u.email}</td>
+
 											<td class="text-center"><c:choose>
 													<c:when test="${u.admin}">
 														<span class="badge bg-danger">Admin</span>
@@ -143,6 +175,16 @@
 														<span class="badge bg-secondary">User</span>
 													</c:otherwise>
 												</c:choose></td>
+
+											<td class="text-center"><c:choose>
+													<c:when test="${u.isActive}">
+														<span class="badge bg-success">Active</span>
+													</c:when>
+													<c:otherwise>
+														<span class="badge bg-dark">Locked</span>
+													</c:otherwise>
+												</c:choose></td>
+
 											<td class="text-end"><a
 												href="<c:url value='/admin/user/edit/${u.id}'/>"
 												class="btn btn-sm btn-outline-primary"> <i
@@ -152,36 +194,35 @@
 									</c:forEach>
 									<c:if test="${empty users}">
 										<tr>
-											<td colspan="5" class="text-center text-muted py-4">Không
+											<td colspan="6" class="text-center text-muted py-4">Không
 												có dữ liệu.</td>
 										</tr>
 									</c:if>
 								</tbody>
 							</table>
-							<br>
-							<nav aria-label="Page navigation">
-								<ul class="pagination justify-content-center">
-									<li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
-										<a class="page-link"
-										href="<c:url value='/admin/users?page=${currentPage - 1}'/>">Previous</a>
-									</li>
-
-									<c:forEach begin="1" end="${totalPage}" var="i">
-										<li class="page-item ${currentPage == i ? 'active' : ''}">
-											<a class="page-link"
-											href="<c:url value='/admin/users?page=${i}'/>">${i}</a>
-										</li>
-									</c:forEach>
-
-									<li
-										class="page-item ${currentPage == totalPage ? 'disabled' : ''}">
-										<a class="page-link"
-										href="<c:url value='/admin/users?page=${currentPage + 1}'/>">Next</a>
-									</li>
-								</ul>
-							</nav>
-							
 						</div>
+					</div>
+
+					<div class="card-footer bg-white py-3">
+						<nav aria-label="Page navigation">
+							<ul class="pagination justify-content-center mb-0">
+								<li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
+									<a class="page-link"
+									href="<c:url value='/admin/users?page=${currentPage - 1}'/>">Previous</a>
+								</li>
+								<c:forEach begin="1" end="${totalPage}" var="i">
+									<li class="page-item ${currentPage == i ? 'active' : ''}">
+										<a class="page-link"
+										href="<c:url value='/admin/users?page=${i}'/>">${i}</a>
+									</li>
+								</c:forEach>
+								<li
+									class="page-item ${currentPage == totalPage ? 'disabled' : ''}">
+									<a class="page-link"
+									href="<c:url value='/admin/users?page=${currentPage + 1}'/>">Next</a>
+								</li>
+							</ul>
+						</nav>
 					</div>
 				</div>
 			</div>

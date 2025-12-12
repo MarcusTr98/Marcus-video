@@ -43,6 +43,9 @@ public class UserEntity {
 
 	@Column(name = "admin", nullable = false)
 	private Boolean admin = false;
+	
+	@Column(name = "isActive")
+	private Boolean isActive = true;
 
 	@OneToMany(mappedBy = "user")
 	private List<FavoriteEntity> favorites;

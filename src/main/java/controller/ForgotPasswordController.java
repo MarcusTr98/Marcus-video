@@ -12,6 +12,7 @@ import entity.UserEntity;
 import service.UserService;
 import service.UserServiceImpl;
 import utils.EmailUtils;
+import utils.BCryptUtils;
 
 @WebServlet("/forgot-password")
 public class ForgotPasswordController extends HttpServlet {
@@ -34,23 +35,36 @@ public class ForgotPasswordController extends HttpServlet {
 			return;
 		}
 
-		// 1. Sinh mật khẩu ngẫu nhiên (Ví dụ: 6 số)
-		String newPassword = String.valueOf((int) (Math.random() * 900000) + 100000);
+		// 1. Sinh mật khẩu ngẫu nhiên (dạng thô - Plain Text)
+		String newPasswordRaw = String.valueOf((int) (Math.random() * 900000) + 100000);
 
-		// 2. Cập nhật mật khẩu mới vào User
-		user.setPassword(newPassword);
+		// 2. [QUAN TRỌNG] Mã hóa mật khẩu trước khi lưu vào DB
+		String hashedPassword = BCryptUtils.hashPassword(newPasswordRaw);
+
+		// 3. Cập nhật mật khẩu ĐÃ MÃ HÓA vào entity
+		user.setPassword(hashedPassword);
 		userService.update(user);
 
-		// 3. Gửi Email
+		// 4. Chuẩn bị nội dung Email (Gửi mật khẩu THÔ - newPasswordRaw)
+		String subject = "MarcusVideo - Cấp lại mật khẩu mới";
+		String content = "<div style='font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ddd;'>"
+				+ "<h2 style='color: #0d6efd;'>MarcusVideo Support</h2>" + "<p>Xin chào <b>" + user.getFullname()
+				+ "</b>,</p>"
+				+ "<p>Mật khẩu mới của bạn là: <b style='font-size: 20px; color: red; letter-spacing: 2px;'>"
+				+ newPasswordRaw + "</b></p>"
+				+ "<p>Vì lý do bảo mật, vui lòng đăng nhập và đổi lại mật khẩu này ngay lập tức.</p>"
+				+ "<br><p>Trân trọng,<br>MarcusVideo Team</p>" + "</div>";
+
+		// 5. Gửi Email (Bất đồng bộ)
 		CompletableFuture.runAsync(() -> {
 			try {
-				EmailUtils.send(user, newPassword); // Gửi pass thô chưa hash
+				EmailUtils.sendEmail(email, subject, content);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		});
 
-		req.setAttribute("message", "Mật khẩu mới đã được gửi về email " + email + ". Vui lòng check cả hòm thư Spam.");
+		req.setAttribute("message", "Mật khẩu mới đã được gửi về email " + email + ".");
 		req.getRequestDispatcher("/views/forgot-password.jsp").forward(req, resp);
 	}
 }

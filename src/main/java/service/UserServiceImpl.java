@@ -13,10 +13,10 @@ public class UserServiceImpl implements UserService {
 	public UserServiceImpl() {
 		this.userDAO = new UserDAOImpl();
 	}
-	
+
 	public void setUserDAO(UserDAO userDAO) {
-        this.userDAO = userDAO;
-    }
+		this.userDAO = userDAO;
+	}
 
 	@Override
 	public UserEntity login(String idOrEmail, String password) {
