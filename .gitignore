@@ -1,0 +1,19 @@
+# Eclipse & IDE files (Rác của Eclipse)
+.classpath
+.project
+.settings/
+.vscode/
+.idea/
+
+# Maven build output
+target/
+*.war
+*.jar
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
