@@ -1,0 +1,9 @@
+
+2025-12-14 15:57:10 [INFO ] XJPA:17 - Khởi tạo JPA EntityManagerFactory thành công!
+2025-12-14 15:57:11 [INFO ] LoginServlet:50 - Login success: admin
+2025-12-14 15:57:11 [INFO ] AdminDashboardController:24 - Admin đã truy cập Dashboard lúc: Sun Dec 14 15:57:11 GMT+07:00 2025
+2025-12-14 15:57:20 [INFO ] AdminDashboardController:24 - Admin đã truy cập Dashboard lúc: Sun Dec 14 15:57:20 GMT+07:00 2025
+2025-12-14 15:58:58 [INFO ] XJPA:17 - Khởi tạo JPA EntityManagerFactory thành công!
+2025-12-14 15:59:18 [INFO ] LoginServlet:50 - Login success: admin
+2025-12-14 15:59:18 [INFO ] AdminDashboardController:24 - Admin đã truy cập Dashboard lúc: Sun Dec 14 15:59:18 GMT+07:00 2025
+2025-12-14 16:00:09 [INFO ] AdminVideoController:112 - ACTION: CREATE_VIDEO | Admin: admin | New ID: UjbKZvPw1MU

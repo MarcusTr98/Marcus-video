@@ -32,14 +32,13 @@ public class LoginServlet extends HttpServlet {
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+			throws ServletException, IOException {		
 		String idOrEmail = request.getParameter("idOrEmail");
 		String password = request.getParameter("password");
 		String remember = request.getParameter("remember");
 		UserEntity user = userService.login(idOrEmail, password);
 
 		if (user != null) {
-			// --- ĐĂNG NHẬP THÀNH CÔNG ---
 			// 1. Kiểm tra Active
 			if (!user.getIsActive()) {
 				request.setAttribute("message", "Tài khoản của bạn đã bị khóa do vi phạm chính sách!");
@@ -72,11 +71,9 @@ public class LoginServlet extends HttpServlet {
 				}
 			}
 		} else {
-			// --- ĐĂNG NHẬP THẤT BẠI ---
-			// (Service trả về null nghĩa là sai Email hoặc sai Password)
 			logger.warn("Login failed for: " + idOrEmail);
 			request.setAttribute("message", "Sai thông tin đăng nhập!");
-			request.setAttribute("idOrEmail", idOrEmail); // Giữ lại email để user đỡ nhập lại
+			request.setAttribute("idOrEmail", idOrEmail);
 			request.getRequestDispatcher("/views/login.jsp").forward(request, response);
 		}
 	}
