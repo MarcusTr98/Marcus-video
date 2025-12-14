@@ -24,7 +24,7 @@ public class AdminUserApi extends HttpServlet {
 		JsonObject json = new JsonObject();
 
 		try {
-			// 1. Lấy user hiện tại từ session (để check logic nghiệp vụ)
+			// 1. Lấy user hiện tại từ session
 			UserEntity currentUser = (UserEntity) req.getSession().getAttribute("user");
 
 			// Refactor #3: Nếu Filter chưa chặn, thì check null ở đây để tránh
@@ -46,18 +46,14 @@ public class AdminUserApi extends HttpServlet {
 				throw new IllegalArgumentException("Thiếu tham số userId hoặc action.");
 			}
 
-			// Id là String
 			String targetUserId = userIdRaw;
-			
-			// Chú ý kiểu dữ liệu ID
 			UserEntity targetUser = userService.findById(targetUserId);
 
 			if (targetUser == null) {
 				json.addProperty("status", "error");
 				json.addProperty("message", "Người dùng không tồn tại.");
 			} else {
-				// 3. Logic nghiệp vụ
-				// Logic: Không được tự khóa chính mình
+				// 3. Logic nghiệp vụ: Không được tự khóa chính mình
 				// So sánh ID (nên dùng equals cho Object)
 				if (targetUser.getId().equals(currentUser.getId())) {
 					json.addProperty("status", "error");

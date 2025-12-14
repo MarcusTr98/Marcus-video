@@ -35,8 +35,6 @@ public class ShareVideoApi extends HttpServlet {
             }
 
             // 3. Tạo nội dung Email
-            // Lưu ý: Trong thực tế, bạn nên dùng VideoDAO để lấy tiêu đề video dựa trên videoId
-            // Ở đây tôi demo tạo link trực tiếp.
             String videoLink = "http://localhost:8080/MarcusVideo/video?id=" + videoId;
             
             String subject = "MarcusVideo: Bạn đã nhận được một chia sẻ video thú vị!";
