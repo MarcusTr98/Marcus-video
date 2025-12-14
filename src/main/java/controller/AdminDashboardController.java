@@ -6,9 +6,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
 
-import dto.VideoLikedInfo;
 import service.StatsService;
 import service.StatsServiceImpl;
 
@@ -19,19 +17,17 @@ public class AdminDashboardController extends HttpServlet {
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		// 1. Thống kê tổng quan (Summary Cards)
+		// 1. Cards Tổng quan
 		req.setAttribute("totalUsers", statsService.countUsers());
 		req.setAttribute("totalVideos", statsService.countVideos());
 		req.setAttribute("totalLikes", statsService.countTotalLikes());
 
-		// 2. Báo cáo Yêu thích (Top Video Liked)
-		List<VideoLikedInfo> videoStats = statsService.findVideoLikedInfo();
-		req.setAttribute("videoStats", videoStats);
+		// 2. Dữ liệu Biểu đồ
+		req.setAttribute("videoStats", statsService.findVideoLikedInfo()); // Top Like
+		req.setAttribute("videoViews", statsService.findTopViews()); // Top View
+		req.setAttribute("userStats", statsService.findNewUsersStats()); // New Users
+		req.setAttribute("videoStatus", statsService.findVideoStatusStats()); // Status Pie Chart
 
-		// 3. Báo cáo Chia sẻ
-		// req.setAttribute("shareStats", statsService.findShareReport());
-
-		// 4. Forward về giao diện Dashboard
 		req.getRequestDispatcher("/views/admin/dashboard.jsp").forward(req, resp);
 	}
 }

@@ -23,5 +23,4 @@ public class FavoriteEntity {
 	@Column(name = "likeDate")
 	@Temporal(TemporalType.DATE)
 	private Date likeDate = new Date();
-
 }

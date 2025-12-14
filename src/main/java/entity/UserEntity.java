@@ -1,5 +1,6 @@
 package entity;
 
+import java.util.Date;
 import java.util.List;
 
 import jakarta.persistence.Column;
@@ -7,6 +8,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -43,9 +46,14 @@ public class UserEntity {
 
 	@Column(name = "admin", nullable = false)
 	private Boolean admin = false;
-	
+
 	@Column(name = "isActive")
 	private Boolean isActive = true;
+
+	// update chart user
+	@Column(name = "createdDate")
+	@Temporal(TemporalType.DATE)
+	private Date createdDate = new Date();
 
 	@OneToMany(mappedBy = "user")
 	private List<FavoriteEntity> favorites;

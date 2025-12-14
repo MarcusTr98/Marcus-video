@@ -1,7 +1,9 @@
 package dao;
 
+import java.util.ArrayList;
 import java.util.List;
 import dto.VideoLikedInfo;
+import dto.VideoStats;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import utils.XJPA;
@@ -47,7 +49,7 @@ public class StatsDAO {
 		}
 	}
 
-	// 4. Lấy dữ liệu chi tiết cho biểu đồ (Top Like)
+	// biểu đồ Top Like
 	public List<VideoLikedInfo> findVideoLikedInfo() {
 		EntityManager em = XJPA.getEntityManager();
 		try {
@@ -62,6 +64,46 @@ public class StatsDAO {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
+		} finally {
+			em.close();
+		}
+	}
+
+	// biểu đồ top view
+	public List<VideoStats> findTopViews() {
+		EntityManager em = XJPA.getEntityManager();
+		try {
+			String jpql = "SELECT new dto.VideoStats(v.title, CAST(v.views AS long)) " + "FROM VideoEntity v "
+					+ "WHERE v.active = true " + "ORDER BY v.views DESC";
+			return em.createQuery(jpql, VideoStats.class).setMaxResults(10).getResultList();
+		} finally {
+			em.close();
+		}
+	}
+
+	// biểu đồ User đăng ký mới
+	public List<VideoStats> findNewUsersStats() {
+		EntityManager em = XJPA.getEntityManager();
+		try {
+			String jpql = "SELECT new dto.VideoStats(CAST(u.createdDate as string), COUNT(u)) " + "FROM UserEntity u "
+					+ "GROUP BY CAST(u.createdDate as string) " + "ORDER BY CAST(u.createdDate as string) ASC";
+			return em.createQuery(jpql, VideoStats.class).setMaxResults(7).getResultList();
+		} catch (Exception e) {
+			return new ArrayList<>();
+		} finally {
+			em.close();
+		}
+	}
+
+	// biểu đồ tỷ lệ Video Active/Inactive
+	public List<VideoStats> findVideoStatusStats() {
+		EntityManager em = XJPA.getEntityManager();
+		try {
+			// Trả về 'Active' và 'Inactive'
+			String jpql = "SELECT new dto.VideoStats(" + "CASE WHEN v.active = true THEN 'Active' ELSE 'Inactive' END, "
+					+ "COUNT(v)) " + "FROM VideoEntity v " + "GROUP BY v.active";
+
+			return em.createQuery(jpql, VideoStats.class).getResultList();
 		} finally {
 			em.close();
 		}

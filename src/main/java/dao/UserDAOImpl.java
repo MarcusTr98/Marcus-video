@@ -41,7 +41,7 @@ public class UserDAOImpl extends AbstractDAO<UserEntity, String> implements User
 		} catch (NoResultException e) {
 			return null;
 		} catch (Exception e) {
-			System.out.println("Lỗi find By Id Or Email: " + e);
+			System.out.println("Lỗi DAO find By Id Or Email: " + e);
 			return null;
 		} finally {
 			em.close();

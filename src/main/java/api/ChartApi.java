@@ -22,9 +22,9 @@ public class ChartApi extends HttpServlet {
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		resp.setContentType("application/json");
+		resp.setContentType("application/json"); 
 		resp.setCharacterEncoding("UTF-8");
-
+		
 		try {
 			// 1. Gọi Service lấy list DTO
 			List<VideoLikedInfo> data = statsService.findVideoLikedInfo();
